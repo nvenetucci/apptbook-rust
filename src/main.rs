@@ -1,4 +1,5 @@
 use std::io;
+use std::io::Write;
 
 fn main() {
     loop {
@@ -6,7 +7,8 @@ fn main() {
         println!("2) Search for appointments");
         println!("3) Quit\n");
 
-        println!("Enter an option number: ");
+        print!("Enter an option number: ");
+        io::stdout().flush().unwrap();
 
         let mut input_option = String::new();
 
@@ -25,7 +27,8 @@ fn main() {
         if input_option == 1 {
             let mut owner = String::new();
 
-            println!("\nEnter the appointment's owner: ");
+            print!("\nEnter the appointment's owner: ");
+            io::stdout().flush().unwrap();
             io::stdin()
                 .read_line(&mut owner)
                 .expect("Failed to read line");
