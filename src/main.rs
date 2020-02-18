@@ -5,6 +5,7 @@ use std::io::Write;
 fn main() {
     let date_re =
         Regex::new(r"^(0[1-9]|1[012])[/](0[1-9]|[12][0-9]|3[01])[/](19|20)\d\d$").unwrap();
+    let time_re = Regex::new(r"^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$").unwrap();
 
     loop {
         println!("\n1) Add an appointment");
@@ -62,9 +63,27 @@ fn main() {
                 }
             }
 
+            let mut start_time = String::new();
+
+            loop {
+                print!("Enter the start time: ");
+                io::stdout().flush().unwrap();
+                io::stdin()
+                    .read_line(&mut start_time)
+                    .expect("Failed to read line");
+
+                if time_re.is_match(&start_time.trim()) {
+                    break;
+                } else {
+                    println!("Invalid time. Required (24-hour time) format: hh:mm");
+                    start_time = "".to_string();
+                }
+            }
+
             println!("Owner: {}", owner.trim());
             println!("Description: {}", description.trim());
             println!("Start date: {}", start_date.trim());
+            println!("Start time: {}", start_time.trim());
         } else if input_option == 2 {
             println!("You entered {}", input_option);
             println!("This functionality isn't implemented yet");
