@@ -80,10 +80,46 @@ fn main() {
                 }
             }
 
+            let mut end_date = String::new();
+
+            loop {
+                print!("Enter the end date: ");
+                io::stdout().flush().unwrap();
+                io::stdin()
+                    .read_line(&mut end_date)
+                    .expect("Failed to read line");
+
+                if date_re.is_match(&end_date.trim()) {
+                    break;
+                } else {
+                    println!("Invalid date. Required format: mm/dd/yyyy");
+                    end_date = "".to_string();
+                }
+            }
+
+            let mut end_time = String::new();
+
+            loop {
+                print!("Enter the end time: ");
+                io::stdout().flush().unwrap();
+                io::stdin()
+                    .read_line(&mut end_time)
+                    .expect("Failed to read line");
+
+                if time_re.is_match(&end_time.trim()) {
+                    break;
+                } else {
+                    println!("Invalid time. Required (24-hour time) format: hh:mm");
+                    end_time = "".to_string();
+                }
+            }
+
             println!("Owner: {}", owner.trim());
             println!("Description: {}", description.trim());
             println!("Start date: {}", start_date.trim());
             println!("Start time: {}", start_time.trim());
+            println!("End date: {}", end_date.trim());
+            println!("End time: {}", end_time.trim());
         } else if input_option == 2 {
             println!("You entered {}", input_option);
             println!("This functionality isn't implemented yet");
