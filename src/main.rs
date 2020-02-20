@@ -2,6 +2,13 @@ use regex::Regex;
 use std::io;
 use std::io::Write;
 
+struct Appointment {
+    owner: String,
+    description: String,
+    start_date_time: String,
+    end_date_time: String,
+}
+
 fn main() {
     let date_re =
         Regex::new(r"^(0[1-9]|1[012])[/](0[1-9]|[12][0-9]|3[01])[/](19|20)\d\d$").unwrap();
@@ -114,12 +121,22 @@ fn main() {
                 }
             }
 
-            println!("Owner: {}", owner.trim());
-            println!("Description: {}", description.trim());
-            println!("Start date: {}", start_date.trim());
-            println!("Start time: {}", start_time.trim());
-            println!("End date: {}", end_date.trim());
-            println!("End time: {}", end_time.trim());
+            owner = owner.trim().to_string();
+            description = description.trim().to_string();
+            let start_date_time = format!("{} {}", start_date.trim(), start_time.trim());
+            let end_date_time = format!("{} {}", end_date.trim(), end_time.trim());
+
+            let appt = Appointment {
+                owner,
+                description,
+                start_date_time,
+                end_date_time,
+            };
+
+            println!("Owner: {}", appt.owner);
+            println!("Description: {}", appt.description);
+            println!("Start date/time: {}", appt.start_date_time);
+            println!("End date/time: {}", appt.end_date_time);
         } else if input_option == 2 {
             println!("You entered {}", input_option);
             println!("This functionality isn't implemented yet");
