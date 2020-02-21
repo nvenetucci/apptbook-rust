@@ -1,9 +1,10 @@
 use regex::Regex;
+use std::collections::HashMap;
 use std::io;
 use std::io::Write;
 
+#[derive(Debug)]
 struct Appointment {
-    owner: String,
     description: String,
     start_date_time: String,
     end_date_time: String,
@@ -13,6 +14,8 @@ fn main() {
     let date_re =
         Regex::new(r"^(0[1-9]|1[012])[/](0[1-9]|[12][0-9]|3[01])[/](19|20)\d\d$").unwrap();
     let time_re = Regex::new(r"^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$").unwrap();
+
+    let mut apptbook: HashMap<String, Vec<Appointment>> = HashMap::new();
 
     loop {
         println!("\n1) Add an appointment");
@@ -127,19 +130,28 @@ fn main() {
             let end_date_time = format!("{} {}", end_date.trim(), end_time.trim());
 
             let appt = Appointment {
-                owner,
                 description,
                 start_date_time,
                 end_date_time,
             };
 
-            println!("Owner: {}", appt.owner);
-            println!("Description: {}", appt.description);
-            println!("Start date/time: {}", appt.start_date_time);
-            println!("End date/time: {}", appt.end_date_time);
+            apptbook.entry(owner).or_insert_with(Vec::new).push(appt);
+
+            println!("\nAppointment added successfully");
         } else if input_option == 2 {
-            println!("You entered {}", input_option);
-            println!("This functionality isn't implemented yet");
+            println!("available owners:");
+            dbg!(apptbook.keys());
+
+            let mut owner_to_search = String::new();
+
+            print!("Enter the owner of the appointments you'd like to see: ");
+            io::stdout().flush().unwrap();
+            io::stdin()
+                .read_line(&mut owner_to_search)
+                .expect("Failed to read line");
+
+            let appts = apptbook.get(owner_to_search.trim());
+            dbg!(appts);
         } else {
             println!("Goodbye");
             break;
