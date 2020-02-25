@@ -139,19 +139,23 @@ fn main() {
 
             println!("\nAppointment added successfully");
         } else if input_option == 2 {
-            println!("available owners:");
-            dbg!(apptbook.keys());
+            if apptbook.is_empty() {
+                println!("Appointment book is empty. Try adding an appointment")
+            } else {
+                println!("available owners:");
+                dbg!(apptbook.keys());
 
-            let mut owner_to_search = String::new();
+                let mut owner_to_search = String::new();
 
-            print!("Enter the owner of the appointments you'd like to see: ");
-            io::stdout().flush().unwrap();
-            io::stdin()
-                .read_line(&mut owner_to_search)
-                .expect("Failed to read line");
+                print!("Enter the owner of the appointments you'd like to see: ");
+                io::stdout().flush().unwrap();
+                io::stdin()
+                    .read_line(&mut owner_to_search)
+                    .expect("Failed to read line");
 
-            let appts = apptbook.get(owner_to_search.trim());
-            dbg!(appts);
+                let appts = apptbook.get(owner_to_search.trim());
+                dbg!(appts);
+            }
         } else {
             println!("Goodbye");
             break;
