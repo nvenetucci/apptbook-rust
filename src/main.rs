@@ -1,9 +1,13 @@
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs;
+use std::fs::OpenOptions;
 use std::io;
+use std::io::Read;
 use std::io::Write;
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Appointment {
     description: String,
     start_date_time: String,
@@ -15,7 +19,28 @@ fn main() {
         Regex::new(r"^(0[1-9]|1[012])[/](0[1-9]|[12][0-9]|3[01])[/](19|20)\d\d$").unwrap();
     let time_re = Regex::new(r"^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$").unwrap();
 
-    let mut apptbook: HashMap<String, Vec<Appointment>> = HashMap::new();
+    let mut appts = String::new();
+
+    match OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open("apptbook.txt")
+    {
+        Ok(ref mut file) => {
+            file.read_to_string(&mut appts)
+                .expect("Failed to read file");
+        }
+        Err(err) => {
+            panic!("Failed to open file: {}", err);
+        }
+    }
+
+    if appts.is_empty() {
+        appts.push_str("{}");
+    }
+
+    let mut apptbook: HashMap<String, Vec<Appointment>> = serde_json::from_str(&appts).unwrap();
 
     loop {
         println!("\n1) Add an appointment");
@@ -142,7 +167,7 @@ fn main() {
             if apptbook.is_empty() {
                 println!("Appointment book is empty. Try adding an appointment")
             } else {
-                println!("available owners:");
+                println!("\navailable owners:");
                 dbg!(apptbook.keys());
 
                 let mut owner_to_search = String::new();
@@ -157,8 +182,12 @@ fn main() {
                 dbg!(appts);
             }
         } else {
-            println!("Goodbye");
+            println!("\nGoodbye\n");
             break;
         }
     }
+
+    let serialized = serde_json::to_string(&apptbook).unwrap();
+
+    fs::write("apptbook.txt", serialized).expect("Failed to write file");
 }
