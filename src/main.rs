@@ -1,3 +1,4 @@
+use chrono::prelude::*;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -10,8 +11,8 @@ use std::io::Write;
 #[derive(Serialize, Deserialize, Debug)]
 struct Appointment {
     description: String,
-    start_date_time: String,
-    end_date_time: String,
+    start_date_time: NaiveDateTime,
+    end_date_time: NaiveDateTime,
 }
 
 fn main() {
@@ -150,17 +151,31 @@ fn main() {
             }
 
             owner = owner.trim().to_string();
+            let to_sort = owner.clone();
+
             description = description.trim().to_string();
             let start_date_time = format!("{} {}", start_date.trim(), start_time.trim());
             let end_date_time = format!("{} {}", end_date.trim(), end_time.trim());
 
+            let sdt = NaiveDateTime::parse_from_str(&start_date_time, "%m/%d/%Y %H:%M").unwrap();
+            let edt = NaiveDateTime::parse_from_str(&end_date_time, "%m/%d/%Y %H:%M").unwrap();
+
             let appt = Appointment {
                 description,
-                start_date_time,
-                end_date_time,
+                start_date_time: sdt,
+                end_date_time: edt,
             };
 
             apptbook.entry(owner).or_insert_with(Vec::new).push(appt);
+
+            let owners_vec = apptbook.get_mut(&to_sort).unwrap();
+
+            owners_vec.sort_by(|a, b| {
+                a.start_date_time
+                    .cmp(&b.start_date_time)
+                    .then(a.end_date_time.cmp(&b.end_date_time))
+                    .then(a.description.cmp(&b.description))
+            });
 
             println!("\nAppointment added successfully");
         } else if input_option == 2 {
