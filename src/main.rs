@@ -193,8 +193,23 @@ fn main() {
                     .read_line(&mut owner_to_search)
                     .expect("Failed to read line");
 
-                let appts = apptbook.get(owner_to_search.trim());
-                dbg!(appts);
+                if let Some(appts) = apptbook.get(owner_to_search.trim()) {
+                    for appt in appts {
+                        let start_date_time_format =
+                            appt.start_date_time.format("%m/%d/%Y %H:%M").to_string();
+                        let end_date_time_format =
+                            appt.end_date_time.format("%m/%d/%Y %H:%M").to_string();
+
+                        println!("\n{}", appt.description);
+                        println!("| {} to {}", start_date_time_format, end_date_time_format);
+                        println!(
+                            "| Duration: {} minutes",
+                            (appt.end_date_time - appt.start_date_time).num_minutes()
+                        );
+                    }
+                } else {
+                    println!("There are currently no appointments for that owner");
+                }
             }
         } else {
             println!("\nGoodbye\n");
