@@ -182,12 +182,12 @@ fn main() {
             if apptbook.is_empty() {
                 println!("Appointment book is empty. Try adding an appointment")
             } else {
-                println!("\navailable owners:");
+                println!("\nAvailable owners:");
                 dbg!(apptbook.keys());
 
                 let mut owner_to_search = String::new();
 
-                print!("Enter the owner of the appointments you'd like to see: ");
+                print!("Show appointments for: ");
                 io::stdout().flush().unwrap();
                 io::stdin()
                     .read_line(&mut owner_to_search)
@@ -195,13 +195,18 @@ fn main() {
 
                 if let Some(appts) = apptbook.get(owner_to_search.trim()) {
                     for appt in appts {
-                        let start_date_time_format =
+                        let formatted_sdt =
                             appt.start_date_time.format("%m/%d/%Y %H:%M").to_string();
-                        let end_date_time_format =
-                            appt.end_date_time.format("%m/%d/%Y %H:%M").to_string();
+
+                        let formatted_edt =
+                            if appt.start_date_time.date() == appt.end_date_time.date() {
+                                appt.end_date_time.format("%H:%M").to_string()
+                            } else {
+                                appt.end_date_time.format("%m/%d/%Y %H:%M").to_string()
+                            };
 
                         println!("\n{}", appt.description);
-                        println!("| {} to {}", start_date_time_format, end_date_time_format);
+                        println!("| {} to {}", formatted_sdt, formatted_edt);
                         println!(
                             "| Duration: {} minutes",
                             (appt.end_date_time - appt.start_date_time).num_minutes()
