@@ -182,12 +182,14 @@ fn main() {
             if apptbook.is_empty() {
                 println!("Appointment book is empty. Try adding an appointment")
             } else {
-                println!("\nAvailable owners:");
-                dbg!(apptbook.keys());
+                println!("\nAvailable appointment owners:");
+                for owner in apptbook.keys() {
+                    println!("* {}", owner);
+                }
 
                 let mut owner_to_search = String::new();
 
-                print!("Show appointments for: ");
+                print!("\nShow appointments for: ");
                 io::stdout().flush().unwrap();
                 io::stdin()
                     .read_line(&mut owner_to_search)
@@ -205,7 +207,7 @@ fn main() {
                                 appt.end_date_time.format("%m/%d/%Y %H:%M").to_string()
                             };
 
-                        println!("\n{}", appt.description);
+                        println!("\n> {}", appt.description);
                         println!("| {} to {}", formatted_sdt, formatted_edt);
                         println!(
                             "| Duration: {} minutes",
