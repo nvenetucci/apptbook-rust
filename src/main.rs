@@ -76,7 +76,7 @@ fn main() {
 
             let mut description = String::new();
 
-            print!("Enter a description: ");
+            print!("Enter the description: ");
             io::stdout().flush().unwrap();
             io::stdin()
                 .read_line(&mut description)
@@ -126,7 +126,22 @@ fn main() {
                     .expect("Failed to read line");
 
                 if date_re.is_match(&end_date.trim()) {
-                    break;
+                    // setup start_date and end_date for validation
+                    let formatted_sd = format!("{} {}", start_date.trim(), "00:00");
+                    let formatted_ed = format!("{} {}", end_date.trim(), "00:00");
+                    let sd =
+                        NaiveDateTime::parse_from_str(&formatted_sd, "%m/%d/%Y %H:%M").unwrap();
+                    let ed =
+                        NaiveDateTime::parse_from_str(&formatted_ed, "%m/%d/%Y %H:%M").unwrap();
+
+                    // make sure end_date doesn't occur before start_date
+                    if ed < sd {
+                        println!("Invalid date. End date cannot occur before start date");
+                        end_date = "".to_string();
+                    } else {
+                        // the end_date is approved
+                        break;
+                    }
                 } else {
                     println!("Invalid date. Required format: mm/dd/yyyy");
                     end_date = "".to_string();
