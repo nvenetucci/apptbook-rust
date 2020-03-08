@@ -158,7 +158,22 @@ fn main() {
                     .expect("Failed to read line");
 
                 if time_re.is_match(&end_time.trim()) {
-                    break;
+                    // Setup start_time and end_time for validation
+                    let formatted_st = format!("{} {}", start_date.trim(), start_time.trim());
+                    let formatted_et = format!("{} {}", end_date.trim(), end_time.trim());
+                    let st =
+                        NaiveDateTime::parse_from_str(&formatted_st, "%m/%d/%Y %H:%M").unwrap();
+                    let et =
+                        NaiveDateTime::parse_from_str(&formatted_et, "%m/%d/%Y %H:%M").unwrap();
+
+                    // Make sure end_time doesn't occur before start_time
+                    if et < st {
+                        println!("Invalid time. End time cannot occur before start time");
+                        end_time = "".to_string();
+                    } else {
+                        // The end_time is approved
+                        break;
+                    }
                 } else {
                     println!("Invalid time. Required (24-hour time) format: hh:mm");
                     end_time = "".to_string();
