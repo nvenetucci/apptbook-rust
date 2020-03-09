@@ -20,8 +20,10 @@ fn main() {
         Regex::new(r"^(0[1-9]|1[012])[/](0[1-9]|[12][0-9]|3[01])[/](19|20)\d\d$").unwrap();
     let time_re = Regex::new(r"^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$").unwrap();
 
+    // String to hold read-in HashMap from storage file
     let mut appts = String::new();
 
+    // Attempt to read-in storage file. If file doesn't exist, create one
     match OpenOptions::new()
         .read(true)
         .write(true)
@@ -37,6 +39,7 @@ fn main() {
         }
     }
 
+    // If String empty, allocate with "{}" to represent an empty HashMap
     if appts.is_empty() {
         appts.push_str("{}");
     }
@@ -45,7 +48,7 @@ fn main() {
 
     loop {
         println!("\n1) Add an appointment");
-        println!("2) Search for appointments");
+        println!("2) View appointments");
         println!("3) Quit\n");
 
         print!("Enter an option number: ");
@@ -57,6 +60,7 @@ fn main() {
             .read_line(&mut input_option)
             .expect("Failed to read line");
 
+        // Check if the user entered a number. If NaN, prompt again
         let input_option: u32 = match input_option.trim().parse() {
             Ok(num) => num,
             Err(_) => {
@@ -66,24 +70,29 @@ fn main() {
         };
 
         if input_option == 1 {
+            // Add an appointment option
             let mut owner = String::new();
+            let mut description = String::new();
+            let mut start_date = String::new();
+            let mut start_time = String::new();
+            let mut end_date = String::new();
+            let mut end_time = String::new();
 
+            // Prompt for owner
             print!("\nEnter the appointment's owner: ");
             io::stdout().flush().unwrap();
             io::stdin()
                 .read_line(&mut owner)
                 .expect("Failed to read line");
 
-            let mut description = String::new();
-
+            // Prompt for description
             print!("Enter the description: ");
             io::stdout().flush().unwrap();
             io::stdin()
                 .read_line(&mut description)
                 .expect("Failed to read line");
 
-            let mut start_date = String::new();
-
+            // Prompt for start date. If invalid input, try again
             loop {
                 print!("Enter the start date: ");
                 io::stdout().flush().unwrap();
@@ -91,6 +100,7 @@ fn main() {
                     .read_line(&mut start_date)
                     .expect("Failed to read line");
 
+                // Check that start_date matches the date regex
                 if date_re.is_match(&start_date.trim()) {
                     break;
                 } else {
@@ -99,8 +109,7 @@ fn main() {
                 }
             }
 
-            let mut start_time = String::new();
-
+            // Prompt for start time. If invalid input, try again
             loop {
                 print!("Enter the start time: ");
                 io::stdout().flush().unwrap();
@@ -108,16 +117,16 @@ fn main() {
                     .read_line(&mut start_time)
                     .expect("Failed to read line");
 
+                // Check that start_time matches the time regex
                 if time_re.is_match(&start_time.trim()) {
                     break;
                 } else {
-                    println!("Invalid time. Required (24-hour time) format: hh:mm");
+                    println!("Invalid time. Required (24-hour clock) format: hh:mm");
                     start_time = "".to_string();
                 }
             }
 
-            let mut end_date = String::new();
-
+            // Prompt for end date. If invalid input, try again
             loop {
                 print!("Enter the end date: ");
                 io::stdout().flush().unwrap();
@@ -125,6 +134,7 @@ fn main() {
                     .read_line(&mut end_date)
                     .expect("Failed to read line");
 
+                // Check that end_date matches the date regex
                 if date_re.is_match(&end_date.trim()) {
                     // setup start_date and end_date for validation
                     let formatted_sd = format!("{} {}", start_date.trim(), "00:00");
@@ -148,8 +158,7 @@ fn main() {
                 }
             }
 
-            let mut end_time = String::new();
-
+            // Prompt for end time. If invalid input, try again
             loop {
                 print!("Enter the end time: ");
                 io::stdout().flush().unwrap();
@@ -157,6 +166,7 @@ fn main() {
                     .read_line(&mut end_time)
                     .expect("Failed to read line");
 
+                // Check that end_time matches the time regex
                 if time_re.is_match(&end_time.trim()) {
                     // Setup start_time and end_time for validation
                     let formatted_st = format!("{} {}", start_date.trim(), start_time.trim());
@@ -175,18 +185,19 @@ fn main() {
                         break;
                     }
                 } else {
-                    println!("Invalid time. Required (24-hour time) format: hh:mm");
+                    println!("Invalid time. Required (24-hour clock) format: hh:mm");
                     end_time = "".to_string();
                 }
             }
 
             owner = owner.trim().to_string();
-            let to_sort = owner.clone();
-
             description = description.trim().to_string();
+
+            // Format start_date/time and end_date/time into one String
             let start_date_time = format!("{} {}", start_date.trim(), start_time.trim());
             let end_date_time = format!("{} {}", end_date.trim(), end_time.trim());
 
+            // Parse start_date_time and end_date_time into NaiveDateTimes
             let sdt = NaiveDateTime::parse_from_str(&start_date_time, "%m/%d/%Y %H:%M").unwrap();
             let edt = NaiveDateTime::parse_from_str(&end_date_time, "%m/%d/%Y %H:%M").unwrap();
 
@@ -196,10 +207,17 @@ fn main() {
                 end_date_time: edt,
             };
 
+            // Clone owner to use again after the move
+            let to_sort = owner.clone();
+
+            // Push owner's Appointment to their Vec in the HashMap. If the owner doesn't already
+            // exist within the HashMap, create for them a new Vec, then push the Appointment
             apptbook.entry(owner).or_insert_with(Vec::new).push(appt);
 
             let owners_vec = apptbook.get_mut(&to_sort).unwrap();
 
+            // Sort owner's Appointment Vec by start_date_time. If start_date_times are equal, sort
+            // by end_date_time. If end_date_times are equal, sort by description (alphabetically)
             owners_vec.sort_by(|a, b| {
                 a.start_date_time
                     .cmp(&b.start_date_time)
@@ -209,6 +227,7 @@ fn main() {
 
             println!("\nAppointment added successfully");
         } else if input_option == 2 {
+            // View appointments option
             if apptbook.is_empty() {
                 println!("Appointment book is empty. Try adding an appointment")
             } else {
@@ -225,6 +244,7 @@ fn main() {
                     .read_line(&mut owner_to_search)
                     .expect("Failed to read line");
 
+                // If the owner exists within the HashMap, pretty print their Appointments
                 if let Some(appts) = apptbook.get(owner_to_search.trim()) {
                     for appt in appts {
                         let formatted_sdt =
@@ -256,5 +276,6 @@ fn main() {
 
     let serialized = serde_json::to_string(&apptbook).unwrap();
 
+    // Save HashMap to storage file
     fs::write("apptbook.txt", serialized).expect("Failed to write file");
 }
