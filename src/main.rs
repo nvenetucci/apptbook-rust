@@ -47,9 +47,10 @@ fn main() {
     let mut apptbook: HashMap<String, Vec<Appointment>> = serde_json::from_str(&appts).unwrap();
 
     loop {
-        println!("\n1) Add an appointment");
+        println!("\n1) Add appointment");
         println!("2) View appointments");
-        println!("3) Quit\n");
+        println!("3) Delete appointments");
+        println!("4) Quit\n");
 
         print!("Enter an option number: ");
         io::stdout().flush().unwrap();
@@ -64,7 +65,7 @@ fn main() {
         let input_option: u32 = match input_option.trim().parse() {
             Ok(num) => num,
             Err(_) => {
-                println!("Invalid option. Must be a valid number");
+                println!("Invalid option. Must be a valid option number");
                 continue;
             }
         };
@@ -236,16 +237,16 @@ fn main() {
                     println!("* {}", owner);
                 }
 
-                let mut owner_to_search = String::new();
+                let mut owner = String::new();
 
-                print!("\nShow appointments for: ");
+                print!("\nView appointments for: ");
                 io::stdout().flush().unwrap();
                 io::stdin()
-                    .read_line(&mut owner_to_search)
+                    .read_line(&mut owner)
                     .expect("Failed to read line");
 
                 // If the owner exists within the HashMap, pretty print their Appointments
-                if let Some(appts) = apptbook.get(owner_to_search.trim()) {
+                if let Some(appts) = apptbook.get(owner.trim()) {
                     for appt in appts {
                         let formatted_sdt =
                             appt.start_date_time.format("%m/%d/%Y %H:%M").to_string();
@@ -268,6 +269,56 @@ fn main() {
                     println!("There are currently no appointments for that owner");
                 }
             }
+        } else if input_option == 3 {
+            // Delete appointments option
+            if apptbook.is_empty() {
+                println!("Appointment book is empty. Try adding an appointment")
+            } else {
+                println!("\nAvailable appointment owners:");
+                for owner in apptbook.keys() {
+                    println!("* {}", owner);
+                }
+
+                let mut owner = String::new();
+
+                print!("\nDelete appointments for: ");
+                io::stdout().flush().unwrap();
+                io::stdin()
+                    .read_line(&mut owner)
+                    .expect("Failed to read line");
+
+                // If the owner exists within the HashMap, ...
+                if apptbook.contains_key(owner.trim()) {
+                    loop {
+                        println!("\n1) Delete all");
+                        println!("2) Delete selected");
+                        println!("3) Cancel\n");
+
+                        print!("Enter an option number: ");
+                        io::stdout().flush().unwrap();
+
+                        let mut delete_option = String::new();
+
+                        io::stdin()
+                            .read_line(&mut delete_option)
+                            .expect("Failed to read line");
+
+                        match delete_option.trim() {
+                            "1" => delete_all(owner.trim(), &mut apptbook),
+                            "2" => println!("\nPlaceholder"),
+                            "3" => (),
+                            _ => {
+                                println!("Invalid option. Must be a valid option number");
+                                continue;
+                            }
+                        }
+
+                        break;
+                    }
+                } else {
+                    println!("There are currently no appointments for that owner");
+                }
+            }
         } else {
             println!("\nGoodbye\n");
             break;
@@ -278,4 +329,29 @@ fn main() {
 
     // Save HashMap to storage file
     fs::write("apptbook.txt", serialized).expect("Failed to write file");
+}
+
+fn delete_all(owner: &str, apptbook: &mut HashMap<String, Vec<Appointment>>) {
+    println!();
+
+    loop {
+        print!("Delete all appointments for {}? (y or n): ", owner);
+        io::stdout().flush().unwrap();
+
+        let mut confirm = String::new();
+        io::stdin()
+            .read_line(&mut confirm)
+            .expect("Failed to read line");
+
+        match confirm.trim().to_lowercase().as_str() {
+            "y" | "yes" => {
+                apptbook.remove(owner);
+                println!("\nAppointments deleted successfully");
+            }
+            "n" | "no" => println!("\nCanceled deleting appointments"),
+            _ => continue,
+        }
+
+        break;
+    }
 }
