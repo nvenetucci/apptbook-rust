@@ -16,8 +16,11 @@ struct Appointment {
 }
 
 fn main() {
+    // date regex received from https://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
     let date_re =
-        Regex::new(r"^(0[1-9]|1[012])[/](0[1-9]|[12][0-9]|3[01])[/](19|20)\d\d$").unwrap();
+        Regex::new(r"^(((0[13-9]|1[012])[/](0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[/]31|02[/](0[1-9]|1[0-9]|2[0-8]))[/][0-9]{4}|02[/]29[/]([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00))$").unwrap();
+
+    // time regex received from https://stackoverflow.com/questions/7536755/regular-expression-for-matching-hhmm-time-format/7536768
     let time_re = Regex::new(r"^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$").unwrap();
 
     // String to hold read-in HashMap from storage file
@@ -434,4 +437,33 @@ fn delete_selected(owner: &str, apptbook: &mut HashMap<String, Vec<Appointment>>
 
         break;
     }
+}
+
+//===============================================================================================
+//===== Unit Tests
+
+#[test]
+fn regex_date() {
+    let date_re =
+        Regex::new(r"^(((0[13-9]|1[012])[/](0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[/]31|02[/](0[1-9]|1[0-9]|2[0-8]))[/][0-9]{4}|02[/]29[/]([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00))$").unwrap();
+
+    assert_eq!(date_re.is_match("02/02/2020"), true);
+    assert_eq!(date_re.is_match("02/29/2020"), true);
+    assert_eq!(date_re.is_match("02/30/2020"), false);
+    assert_eq!(date_re.is_match("02/31/2020"), false);
+    assert_eq!(date_re.is_match("04/30/2020"), true);
+    assert_eq!(date_re.is_match("04/31/2020"), false);
+}
+
+#[test]
+fn regex_time() {
+    let time_re = Regex::new(r"^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$").unwrap();
+
+    assert_eq!(time_re.is_match("00:00"), true);
+    assert_eq!(time_re.is_match("23:59"), true);
+    assert_eq!(time_re.is_match("24:00"), false);
+    assert_eq!(time_re.is_match("24:30"), false);
+    assert_eq!(time_re.is_match("12:60"), false);
+    assert_eq!(time_re.is_match("12:59"), true);
+    assert_eq!(time_re.is_match("00:32"), true);
 }
