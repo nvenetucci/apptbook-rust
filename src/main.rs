@@ -305,7 +305,7 @@ fn main() {
 
                         match delete_option.trim() {
                             "1" => delete_all(owner.trim(), &mut apptbook),
-                            "2" => println!("\nPlaceholder"),
+                            "2" => delete_selected(owner.trim(), &mut apptbook),
                             "3" => (),
                             _ => {
                                 println!("Invalid option. Must be a valid option number");
@@ -350,6 +350,86 @@ fn delete_all(owner: &str, apptbook: &mut HashMap<String, Vec<Appointment>>) {
             }
             "n" | "no" => println!("\nCanceled deleting appointments"),
             _ => continue,
+        }
+
+        break;
+    }
+}
+
+fn delete_selected(owner: &str, apptbook: &mut HashMap<String, Vec<Appointment>>) {
+    let appts = apptbook.get_mut(owner).unwrap();
+    let mut count = 0;
+
+    // Display all owner's appointments
+    for appt in &*appts {
+        count += 1;
+
+        let formatted_sdt = appt.start_date_time.format("%m/%d/%Y %H:%M").to_string();
+
+        let formatted_edt = if appt.start_date_time.date() == appt.end_date_time.date() {
+            appt.end_date_time.format("%H:%M").to_string()
+        } else {
+            appt.end_date_time.format("%m/%d/%Y %H:%M").to_string()
+        };
+
+        println!(
+            "\n<{}> {} | {} to {}",
+            count, appt.description, formatted_sdt, formatted_edt
+        );
+    }
+
+    loop {
+        // Prompt user for which appointment to delete
+        print!("\nEnter the number of the appointment to delete: ");
+        io::stdout().flush().unwrap();
+
+        let mut num = String::new();
+
+        io::stdin()
+            .read_line(&mut num)
+            .expect("Failed to read line");
+
+        // check if user input is a number
+        let num: usize = match num.trim().parse() {
+            Ok(num) => num,
+            Err(_) => {
+                println!("Invalid input. Must be a valid appointment number");
+                continue;
+            }
+        };
+
+        if num > count || num < 1 {
+            println!("Invalid number. Must be a valid appointment number");
+            continue;
+        }
+
+        println!();
+
+        loop {
+            // Confirm deletion of selected appointment
+            print!("Delete appointment <{}> for {}? (y or n): ", num, owner);
+            io::stdout().flush().unwrap();
+
+            let mut confirm = String::new();
+            io::stdin()
+                .read_line(&mut confirm)
+                .expect("Failed to read line");
+
+            match confirm.trim().to_lowercase().as_str() {
+                "y" | "yes" => {
+                    // If only one appointment in Vec, delete owner from HashMap
+                    if count == 1 {
+                        apptbook.remove(owner);
+                    } else {
+                        appts.remove(num - 1);
+                    }
+                    println!("\nAppointment deleted successfully");
+                }
+                "n" | "no" => println!("\nCanceled deleting appointment"),
+                _ => continue,
+            }
+
+            break;
         }
 
         break;
