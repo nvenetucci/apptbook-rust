@@ -338,6 +338,7 @@ fn delete_all(owner: &str, apptbook: &mut HashMap<String, Vec<Appointment>>) {
     println!();
 
     loop {
+        // Confirm deletion of all appointments
         print!("Delete all appointments for {}? (y or n): ", owner);
         io::stdout().flush().unwrap();
 
@@ -466,4 +467,58 @@ fn regex_time() {
     assert_eq!(time_re.is_match("12:60"), false);
     assert_eq!(time_re.is_match("12:59"), true);
     assert_eq!(time_re.is_match("00:32"), true);
+}
+
+#[test]
+fn serialize_deserialize_apptbook() {
+    let start_date_time = "02/02/2020 11:30";
+    let end_date_time = "02/02/2020 12:15";
+
+    let appt = Appointment {
+        description: "Have lunch with Lisa".to_string(),
+        start_date_time: NaiveDateTime::parse_from_str(&start_date_time, "%m/%d/%Y %H:%M").unwrap(),
+        end_date_time: NaiveDateTime::parse_from_str(&end_date_time, "%m/%d/%Y %H:%M").unwrap(),
+    };
+
+    let mut apptbook: HashMap<String, Vec<Appointment>> = HashMap::new();
+
+    apptbook
+        .entry("Tom".to_string())
+        .or_insert_with(Vec::new)
+        .push(appt);
+
+    let serialized = serde_json::to_string(&apptbook).unwrap();
+    let deserialized: HashMap<String, Vec<Appointment>> =
+        serde_json::from_str(&serialized).unwrap();
+
+    let toms_vec = deserialized.get("Tom").unwrap();
+
+    assert_eq!(toms_vec[0].description, "Have lunch with Lisa");
+    assert_eq!(
+        toms_vec[0].start_date_time,
+        NaiveDateTime::parse_from_str("02/02/2020 11:30", "%m/%d/%Y %H:%M").unwrap()
+    );
+    assert_eq!(
+        toms_vec[0].end_date_time,
+        NaiveDateTime::parse_from_str("02/02/2020 12:15", "%m/%d/%Y %H:%M").unwrap()
+    );
+}
+
+#[test]
+fn can_sort_date_time() {
+    let dt1 = NaiveDateTime::parse_from_str("02/02/2020 11:30", "%m/%d/%Y %H:%M").unwrap();
+    let dt2 = NaiveDateTime::parse_from_str("02/02/2020 11:00", "%m/%d/%Y %H:%M").unwrap();
+    let dt3 = NaiveDateTime::parse_from_str("02/02/2020 11:15", "%m/%d/%Y %H:%M").unwrap();
+    let dt4 = NaiveDateTime::parse_from_str("02/02/1999 12:30", "%m/%d/%Y %H:%M").unwrap();
+
+    let mut vec: Vec<NaiveDateTime> = Vec::new();
+
+    vec.push(dt1);
+    vec.push(dt2);
+    vec.push(dt3);
+    vec.push(dt4);
+
+    vec.sort();
+
+    assert_eq!(vec, vec![dt4, dt2, dt3, dt1]);
 }
