@@ -522,3 +522,129 @@ fn can_sort_date_time() {
 
     assert_eq!(vec, vec![dt4, dt2, dt3, dt1]);
 }
+
+#[test]
+fn sort_by_start_date_time() {
+    let sdt1 = NaiveDateTime::parse_from_str("02/15/2020 14:30", "%m/%d/%Y %H:%M").unwrap();
+    let edt1 = NaiveDateTime::parse_from_str("02/15/2020 15:00", "%m/%d/%Y %H:%M").unwrap();
+    let sdt2 = NaiveDateTime::parse_from_str("02/16/2020 08:15", "%m/%d/%Y %H:%M").unwrap();
+    let edt2 = NaiveDateTime::parse_from_str("02/16/2020 09:00", "%m/%d/%Y %H:%M").unwrap();
+    let sdt3 = NaiveDateTime::parse_from_str("02/14/2020 19:30", "%m/%d/%Y %H:%M").unwrap();
+    let edt3 = NaiveDateTime::parse_from_str("02/14/2020 19:45", "%m/%d/%Y %H:%M").unwrap();
+
+    let appt1 = Appointment {
+        description: "Do homework".to_string(),
+        start_date_time: sdt1,
+        end_date_time: edt1,
+    };
+    let appt2 = Appointment {
+        description: "Do more homework".to_string(),
+        start_date_time: sdt2,
+        end_date_time: edt2,
+    };
+    let appt3 = Appointment {
+        description: "Do even more homework".to_string(),
+        start_date_time: sdt3,
+        end_date_time: edt3,
+    };
+
+    let mut vec: Vec<Appointment> = Vec::new();
+    vec.push(appt1);
+    vec.push(appt2);
+    vec.push(appt3);
+
+    vec.sort_by(|a, b| {
+        a.start_date_time
+            .cmp(&b.start_date_time)
+            .then(a.end_date_time.cmp(&b.end_date_time))
+            .then(a.description.cmp(&b.description))
+    });
+
+    assert_eq!(vec[0].description, "Do even more homework");
+    assert_eq!(vec[1].description, "Do homework");
+    assert_eq!(vec[2].description, "Do more homework");
+}
+
+#[test]
+fn sort_by_end_date_time() {
+    let sdt1 = NaiveDateTime::parse_from_str("02/07/2020 08:30", "%m/%d/%Y %H:%M").unwrap();
+    let edt1 = NaiveDateTime::parse_from_str("02/16/2020 15:00", "%m/%d/%Y %H:%M").unwrap();
+    let sdt2 = NaiveDateTime::parse_from_str("02/07/2020 08:30", "%m/%d/%Y %H:%M").unwrap();
+    let edt2 = NaiveDateTime::parse_from_str("02/15/2020 15:00", "%m/%d/%Y %H:%M").unwrap();
+    let sdt3 = NaiveDateTime::parse_from_str("02/07/2020 08:30", "%m/%d/%Y %H:%M").unwrap();
+    let edt3 = NaiveDateTime::parse_from_str("02/17/2020 15:00", "%m/%d/%Y %H:%M").unwrap();
+
+    let appt1 = Appointment {
+        description: "Do homework".to_string(),
+        start_date_time: sdt1,
+        end_date_time: edt1,
+    };
+    let appt2 = Appointment {
+        description: "Do more homework".to_string(),
+        start_date_time: sdt2,
+        end_date_time: edt2,
+    };
+    let appt3 = Appointment {
+        description: "Do even more homework".to_string(),
+        start_date_time: sdt3,
+        end_date_time: edt3,
+    };
+
+    let mut vec: Vec<Appointment> = Vec::new();
+    vec.push(appt1);
+    vec.push(appt2);
+    vec.push(appt3);
+
+    vec.sort_by(|a, b| {
+        a.start_date_time
+            .cmp(&b.start_date_time)
+            .then(a.end_date_time.cmp(&b.end_date_time))
+            .then(a.description.cmp(&b.description))
+    });
+
+    assert_eq!(vec[0].description, "Do more homework");
+    assert_eq!(vec[1].description, "Do homework");
+    assert_eq!(vec[2].description, "Do even more homework");
+}
+
+#[test]
+fn sort_by_description() {
+    let sdt1 = NaiveDateTime::parse_from_str("02/25/2020 06:00", "%m/%d/%Y %H:%M").unwrap();
+    let edt1 = NaiveDateTime::parse_from_str("02/25/2020 07:00", "%m/%d/%Y %H:%M").unwrap();
+    let sdt2 = NaiveDateTime::parse_from_str("02/25/2020 06:00", "%m/%d/%Y %H:%M").unwrap();
+    let edt2 = NaiveDateTime::parse_from_str("02/25/2020 07:00", "%m/%d/%Y %H:%M").unwrap();
+    let sdt3 = NaiveDateTime::parse_from_str("02/25/2020 06:00", "%m/%d/%Y %H:%M").unwrap();
+    let edt3 = NaiveDateTime::parse_from_str("02/25/2020 07:00", "%m/%d/%Y %H:%M").unwrap();
+
+    let appt1 = Appointment {
+        description: "Do homework".to_string(),
+        start_date_time: sdt1,
+        end_date_time: edt1,
+    };
+    let appt2 = Appointment {
+        description: "Do more homework".to_string(),
+        start_date_time: sdt2,
+        end_date_time: edt2,
+    };
+    let appt3 = Appointment {
+        description: "Do even more homework".to_string(),
+        start_date_time: sdt3,
+        end_date_time: edt3,
+    };
+
+    let mut vec: Vec<Appointment> = Vec::new();
+    vec.push(appt1);
+    vec.push(appt2);
+    vec.push(appt3);
+
+    vec.sort_by(|a, b| {
+        a.start_date_time
+            .cmp(&b.start_date_time)
+            .then(a.end_date_time.cmp(&b.end_date_time))
+            .then(a.description.cmp(&b.description))
+    });
+
+    assert_eq!(vec[0].description, "Do even more homework");
+    assert_eq!(vec[1].description, "Do homework");
+    assert_eq!(vec[2].description, "Do more homework");
+}
