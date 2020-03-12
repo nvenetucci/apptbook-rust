@@ -108,7 +108,7 @@ fn main() {
                 if date_re.is_match(&start_date.trim()) {
                     break;
                 } else {
-                    println!("Invalid date. Required format: mm/dd/yyyy");
+                    println!("Invalid date. Required format: mm/dd/yyyy\n");
                     start_date = "".to_string();
                 }
             }
@@ -125,7 +125,7 @@ fn main() {
                 if time_re.is_match(&start_time.trim()) {
                     break;
                 } else {
-                    println!("Invalid time. Required (24-hour clock) format: hh:mm");
+                    println!("Invalid time. Required (24-hour clock) format: hh:mm\n");
                     start_time = "".to_string();
                 }
             }
@@ -150,14 +150,14 @@ fn main() {
 
                     // make sure end_date doesn't occur before start_date
                     if ed < sd {
-                        println!("Invalid date. End date cannot occur before start date");
+                        println!("Invalid date. End date cannot occur before start date\n");
                         end_date = "".to_string();
                     } else {
                         // the end_date is approved
                         break;
                     }
                 } else {
-                    println!("Invalid date. Required format: mm/dd/yyyy");
+                    println!("Invalid date. Required format: mm/dd/yyyy\n");
                     end_date = "".to_string();
                 }
             }
@@ -182,14 +182,14 @@ fn main() {
 
                     // Make sure end_time doesn't occur before start_time
                     if et < st {
-                        println!("Invalid time. End time cannot occur before start time");
+                        println!("Invalid time. End time cannot occur before start time\n");
                         end_time = "".to_string();
                     } else {
                         // The end_time is approved
                         break;
                     }
                 } else {
-                    println!("Invalid time. Required (24-hour clock) format: hh:mm");
+                    println!("Invalid time. Required (24-hour clock) format: hh:mm\n");
                     end_time = "".to_string();
                 }
             }
@@ -647,4 +647,123 @@ fn sort_by_description() {
     assert_eq!(vec[0].description, "Do even more homework");
     assert_eq!(vec[1].description, "Do homework");
     assert_eq!(vec[2].description, "Do more homework");
+}
+
+#[test]
+fn date_time_string_format() {
+    let dt1 = NaiveDateTime::parse_from_str("02/17/2020 23:00", "%m/%d/%Y %H:%M").unwrap();
+    let dt2 = NaiveDateTime::parse_from_str("02/18/2020 00:45", "%m/%d/%Y %H:%M").unwrap();
+
+    let formatted_dt1 = dt1.format("%m/%d/%Y %H:%M").to_string();
+    let formatted_dt2 = dt2.format("%m/%d/%Y %H:%M").to_string();
+
+    assert_eq!(formatted_dt1, "02/17/2020 23:00");
+    assert_eq!(formatted_dt2, "02/18/2020 00:45");
+}
+
+#[test]
+fn date_less_than() {
+    let dt1 = NaiveDateTime::parse_from_str("02/04/2020 00:00", "%m/%d/%Y %H:%M").unwrap();
+    let dt2 = NaiveDateTime::parse_from_str("02/03/2020 00:00", "%m/%d/%Y %H:%M").unwrap();
+
+    let dt3 = NaiveDateTime::parse_from_str("02/29/2020 00:00", "%m/%d/%Y %H:%M").unwrap();
+    let dt4 = NaiveDateTime::parse_from_str("02/01/2020 00:00", "%m/%d/%Y %H:%M").unwrap();
+
+    assert!(dt2 < dt1);
+    assert!(dt4 < dt3);
+}
+
+#[test]
+fn time_less_than() {
+    let dt1 = NaiveDateTime::parse_from_str("01/01/2020 14:30", "%m/%d/%Y %H:%M").unwrap();
+    let dt2 = NaiveDateTime::parse_from_str("01/01/2020 14:25", "%m/%d/%Y %H:%M").unwrap();
+
+    let dt3 = NaiveDateTime::parse_from_str("01/01/2020 23:59", "%m/%d/%Y %H:%M").unwrap();
+    let dt4 = NaiveDateTime::parse_from_str("01/01/2020 00:00", "%m/%d/%Y %H:%M").unwrap();
+
+    assert!(dt2 < dt1);
+    assert!(dt4 < dt3);
+}
+
+#[test]
+fn remove_owner_from_apptbook() {
+    let mut apptbook: HashMap<String, Vec<Appointment>> = HashMap::new();
+
+    let start_date_time1 = "03/11/2020 07:30";
+    let end_date_time1 = "03/11/2020 08:30";
+
+    let start_date_time2 = "03/18/2020 12:30";
+    let end_date_time2 = "03/18/2020 12:40";
+
+    let appt1 = Appointment {
+        description: "Dentist appointment".to_string(),
+        start_date_time: NaiveDateTime::parse_from_str(&start_date_time1, "%m/%d/%Y %H:%M")
+            .unwrap(),
+        end_date_time: NaiveDateTime::parse_from_str(&end_date_time1, "%m/%d/%Y %H:%M").unwrap(),
+    };
+
+    let appt2 = Appointment {
+        description: "Eat Candy".to_string(),
+        start_date_time: NaiveDateTime::parse_from_str(&start_date_time2, "%m/%d/%Y %H:%M")
+            .unwrap(),
+        end_date_time: NaiveDateTime::parse_from_str(&end_date_time2, "%m/%d/%Y %H:%M").unwrap(),
+    };
+
+    apptbook
+        .entry("Billy".to_string())
+        .or_insert_with(Vec::new)
+        .push(appt1);
+
+    apptbook
+        .entry("Erik".to_string())
+        .or_insert_with(Vec::new)
+        .push(appt2);
+
+    assert_eq!(apptbook.len(), 2);
+    apptbook.remove("Billy");
+    assert_eq!(apptbook.len(), 1);
+    apptbook.remove("Erik");
+    assert_eq!(apptbook.len(), 0);
+}
+
+#[test]
+fn remove_appt_from_apptbook_vec() {
+    let mut apptbook: HashMap<String, Vec<Appointment>> = HashMap::new();
+
+    let start_date_time1 = "02/02/2020 11:30";
+    let end_date_time1 = "02/02/2020 12:15";
+
+    let start_date_time2 = "02/17/2020 11:00";
+    let end_date_time2 = "02/17/2020 11:30";
+
+    let appt1 = Appointment {
+        description: "Have lunch with Lisa".to_string(),
+        start_date_time: NaiveDateTime::parse_from_str(&start_date_time1, "%m/%d/%Y %H:%M")
+            .unwrap(),
+        end_date_time: NaiveDateTime::parse_from_str(&end_date_time1, "%m/%d/%Y %H:%M").unwrap(),
+    };
+
+    let appt2 = Appointment {
+        description: "Eat lunch alone".to_string(),
+        start_date_time: NaiveDateTime::parse_from_str(&start_date_time2, "%m/%d/%Y %H:%M")
+            .unwrap(),
+        end_date_time: NaiveDateTime::parse_from_str(&end_date_time2, "%m/%d/%Y %H:%M").unwrap(),
+    };
+
+    apptbook
+        .entry("Tom".to_string())
+        .or_insert_with(Vec::new)
+        .push(appt1);
+
+    apptbook
+        .entry("Tom".to_string())
+        .or_insert_with(Vec::new)
+        .push(appt2);
+
+    let toms_vec = apptbook.get_mut("Tom").unwrap();
+
+    assert_eq!(toms_vec.len(), 2);
+    toms_vec.remove(0);
+    assert_eq!(toms_vec.len(), 1);
+    assert_eq!(toms_vec[0].description, "Eat lunch alone");
 }
