@@ -322,9 +322,13 @@ fn main() {
                     println!("There are currently no appointments for that owner");
                 }
             }
-        } else {
+        } else if input_option == 4 {
+            // Quit option
             println!("\nGoodbye\n");
             break;
+        } else {
+            // Invalid option
+            println!("Invalid option. Must be a valid option number");
         }
     }
 
