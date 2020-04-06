@@ -1,3 +1,10 @@
+//====================================
+// Nicholai Venetucci <npv2@pdx.edu>
+// CS410P Rust Programming
+// Winter 2020
+// Course Project apptbook-rust
+//====================================
+
 use chrono::prelude::*;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
